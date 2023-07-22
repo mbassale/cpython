@@ -87,6 +87,8 @@ typedef struct {
     PyObject *Lt_type;
     PyObject *MatMult_singleton;
     PyObject *MatMult_type;
+    PyObject *MinusMinus_singleton;
+    PyObject *MinusMinus_type;
     PyObject *Mod_singleton;
     PyObject *Mod_type;
     PyObject *Module_type;
@@ -104,6 +106,8 @@ typedef struct {
     PyObject *Or_singleton;
     PyObject *Or_type;
     PyObject *Pass_type;
+    PyObject *PlusPlus_singleton;
+    PyObject *PlusPlus_type;
     PyObject *Pow_singleton;
     PyObject *Pow_type;
     PyObject *RShift_singleton;
@@ -332,6 +336,8 @@ void _PyAST_Fini()
     Py_CLEAR(state->Lt_type);
     Py_CLEAR(state->MatMult_singleton);
     Py_CLEAR(state->MatMult_type);
+    Py_CLEAR(state->MinusMinus_singleton);
+    Py_CLEAR(state->MinusMinus_type);
     Py_CLEAR(state->Mod_singleton);
     Py_CLEAR(state->Mod_type);
     Py_CLEAR(state->Module_type);
@@ -349,6 +355,8 @@ void _PyAST_Fini()
     Py_CLEAR(state->Or_singleton);
     Py_CLEAR(state->Or_type);
     Py_CLEAR(state->Pass_type);
+    Py_CLEAR(state->PlusPlus_singleton);
+    Py_CLEAR(state->PlusPlus_type);
     Py_CLEAR(state->Pow_singleton);
     Py_CLEAR(state->Pow_type);
     Py_CLEAR(state->RShift_singleton);
@@ -1695,7 +1703,7 @@ static int init_types(astmodulestate *state)
                                                   NULL);
     if (!state->FloorDiv_singleton) return 0;
     state->unaryop_type = make_type(state, "unaryop", state->AST_type, NULL, 0,
-        "unaryop = Invert | Not | UAdd | USub");
+        "unaryop = Invert | Not | UAdd | USub | PlusPlus | MinusMinus");
     if (!state->unaryop_type) return 0;
     if (!add_attributes(state, state->unaryop_type, NULL, 0)) return 0;
     state->Invert_type = make_type(state, "Invert", state->unaryop_type, NULL,
@@ -1724,6 +1732,22 @@ static int init_types(astmodulestate *state)
     state->USub_singleton = PyType_GenericNew((PyTypeObject *)state->USub_type,
                                               NULL, NULL);
     if (!state->USub_singleton) return 0;
+    state->PlusPlus_type = make_type(state, "PlusPlus", state->unaryop_type,
+                                     NULL, 0,
+        "PlusPlus");
+    if (!state->PlusPlus_type) return 0;
+    state->PlusPlus_singleton = PyType_GenericNew((PyTypeObject
+                                                  *)state->PlusPlus_type, NULL,
+                                                  NULL);
+    if (!state->PlusPlus_singleton) return 0;
+    state->MinusMinus_type = make_type(state, "MinusMinus",
+                                       state->unaryop_type, NULL, 0,
+        "MinusMinus");
+    if (!state->MinusMinus_type) return 0;
+    state->MinusMinus_singleton = PyType_GenericNew((PyTypeObject
+                                                    *)state->MinusMinus_type,
+                                                    NULL, NULL);
+    if (!state->MinusMinus_singleton) return 0;
     state->cmpop_type = make_type(state, "cmpop", state->AST_type, NULL, 0,
         "cmpop = Eq | NotEq | Lt | LtE | Gt | GtE | Is | IsNot | In | NotIn");
     if (!state->cmpop_type) return 0;
@@ -4496,6 +4520,12 @@ PyObject* ast2obj_unaryop(astmodulestate *state, unaryop_ty o)
         case USub:
             Py_INCREF(state->USub_singleton);
             return state->USub_singleton;
+        case PlusPlus:
+            Py_INCREF(state->PlusPlus_singleton);
+            return state->PlusPlus_singleton;
+        case MinusMinus:
+            Py_INCREF(state->MinusMinus_singleton);
+            return state->MinusMinus_singleton;
     }
     Py_UNREACHABLE();
 }
@@ -9283,6 +9313,22 @@ obj2ast_unaryop(astmodulestate *state, PyObject* obj, unaryop_ty* out, PyArena*
         *out = USub;
         return 0;
     }
+    isinstance = PyObject_IsInstance(obj, state->PlusPlus_type);
+    if (isinstance == -1) {
+        return 1;
+    }
+    if (isinstance) {
+        *out = PlusPlus;
+        return 0;
+    }
+    isinstance = PyObject_IsInstance(obj, state->MinusMinus_type);
+    if (isinstance == -1) {
+        return 1;
+    }
+    if (isinstance) {
+        *out = MinusMinus;
+        return 0;
+    }
 
     PyErr_Format(PyExc_TypeError, "expected some sort of unaryop, but got %R", obj);
     return 1;
@@ -10692,6 +10738,14 @@ astmodule_exec(PyObject *m)
         return -1;
     }
     Py_INCREF(state->USub_type);
+    if (PyModule_AddObject(m, "PlusPlus", state->PlusPlus_type) < 0) {
+        return -1;
+    }
+    Py_INCREF(state->PlusPlus_type);
+    if (PyModule_AddObject(m, "MinusMinus", state->MinusMinus_type) < 0) {
+        return -1;
+    }
+    Py_INCREF(state->MinusMinus_type);
     if (PyModule_AddObject(m, "cmpop", state->cmpop_type) < 0) {
         return -1;
     }

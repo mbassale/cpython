@@ -65,9 +65,9 @@ def_op('NOP', 9)
 def_op('UNARY_POSITIVE', 10)
 def_op('UNARY_NEGATIVE', 11)
 def_op('UNARY_NOT', 12)
-
+def_op('UNARY_PLUSPLUS', 13)
+def_op('UNARY_MINUSMINUS', 14)
 def_op('UNARY_INVERT', 15)
-
 def_op('BINARY_MATRIX_MULTIPLY', 16)
 def_op('INPLACE_MATRIX_MULTIPLY', 17)
 

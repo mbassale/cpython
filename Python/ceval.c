@@ -1603,6 +1603,34 @@ main_loop:
             DISPATCH();
         }
 
+        case TARGET(UNARY_PLUSPLUS): {
+            PyObject *value = TOP();
+            PyObject *one = PyLong_FromLong(1L);
+            if (one == NULL)
+                goto error;
+            PyObject *res = PyNumber_InPlaceAdd(value, one);
+            Py_DECREF(value);
+            Py_DECREF(one);
+            SET_TOP(res);
+            if (res == NULL)
+                goto error;
+            DISPATCH();
+        }
+
+        case TARGET(UNARY_MINUSMINUS): {
+            PyObject *value = TOP();
+            PyObject *one = PyLong_FromLong(1L);
+            if (one == NULL)
+                goto error;
+            PyObject *res = PyNumber_InPlaceSubtract(value, one);
+            Py_DECREF(value);
+            Py_DECREF(one);
+            SET_TOP(res);
+            if (res == NULL)
+                goto error;
+            DISPATCH();
+        }
+
         case TARGET(BINARY_POWER): {
             PyObject *exp = POP();
             PyObject *base = TOP();

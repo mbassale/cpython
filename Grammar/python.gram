@@ -451,6 +451,8 @@ factor[expr_ty] (memo):
     | '+' a=factor { _Py_UnaryOp(UAdd, a, EXTRA) }
     | '-' a=factor { _Py_UnaryOp(USub, a, EXTRA) }
     | '~' a=factor { _Py_UnaryOp(Invert, a, EXTRA) }
+    | '++' a=factor { _Py_UnaryOp(PlusPlus, a, EXTRA) }
+    | '--' a=factor { _Py_UnaryOp(MinusMinus, a, EXTRA) }
     | power
 power[expr_ty]:
     | a=await_primary '**' b=factor { _Py_BinOp(a, Pow, b, EXTRA) }

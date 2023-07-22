@@ -984,6 +984,10 @@ get_operator(struct compiling *c, const node *n)
             return Div;
         case DOUBLESLASH:
             return FloorDiv;
+        case PLUSPLUS:
+            return PlusPlus;
+        case MINUSMINUS:
+            return MinusMinus;
         case PERCENT:
             return Mod;
         default:
